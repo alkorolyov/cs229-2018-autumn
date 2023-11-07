@@ -60,6 +60,14 @@ def load_dataset(csv_path, label_col='y', add_intercept=False):
     return inputs, labels
 
 
+def logit(z):
+    return 1 / (1 + np.exp(-z))
+
+
+def logit_(z):
+    l = logit(z)
+    return l * (1 - z)
+
 def plot(x, y, theta, save_path=None, correction=1.0):
     """Plot dataset and fitted logistic regression parameters.
     Args:

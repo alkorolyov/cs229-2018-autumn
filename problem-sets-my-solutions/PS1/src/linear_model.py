@@ -16,6 +16,7 @@ class LinearModel(object):
         self.max_iter = max_iter
         self.eps = eps
         self.verbose = verbose
+        self.loss = None
 
     def fit(self, x, y):
         """Run solver to fit linear model.

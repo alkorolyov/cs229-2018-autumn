@@ -34,7 +34,18 @@ class LogisticRegression(LinearModel):
             x: Training example inputs. Shape (m, n).
             y: Training example labels. Shape (m,).
         """
-        # *** START CODE HERE ***
+        for i in range(self.max_iter):
+            _theta = self.theta.copy()
+            x_theta = x.dot(self.theta)
+            hessian = np.linalg.multi_dot([x.T, np.diag(util.logit_(x_theta)), x])
+            grad = x.T.dot(y - util.logit(x_theta))
+            self.theta = self.theta + np.linalg.inv(hessian).dot(grad)
+
+            error = np.sqrt(np.sum((_theta - self.theta) * (_theta - self.theta)))
+            if error < self.eps:
+                break
+
+# *** START CODE HERE ***
         # *** END CODE HERE ***
 
     def predict(self, x):
@@ -47,4 +58,5 @@ class LogisticRegression(LinearModel):
             Outputs of shape (m,).
         """
         # *** START CODE HERE ***
+
         # *** END CODE HERE ***
