@@ -1,0 +1,269 @@
+\documentclass{article}
+
+\usepackage{amsmath,amsfonts}
+\usepackage{mathtools, amssymb}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\usepackage{mathtools}
+\usepackage{cancel}
+\usepackage{array}
+
+\begin{document}
+
+General notation remarks. Sometimes the vector sign $\vec x = x$ is omitted for clarity and left only when it is necessary to distinguish it from scalars. 
+Upper indices indicate the index of inputs $(x^{(i)}, \enskip y^{(i)})$. Where $x^{(i)} $ is a {\bf vector} of input features and  $y^{(i)}$ is a {\bf scalar} of target variable.
+Lower indices show the dimension  $\vec x = [x_0, \dots, x_j, \dots, x_n]$. Vector $\vec \theta = [\theta_0, \dots, \theta_j, \dots, \theta_n]$ is a vector of parameters for our
+model. For our case we have $m$ samples in the dataset and $n + 1$ dimensions of the inputs.
+
+Our task is to proove that the Hessian matrix for loss function $J(\theta)$ is positive-semidefinite, meaning
+
+\[
+z^T H z \ge 0
+\quad \text {, for any} \enskip z
+\]
+
+However there is another approach to prove a matrix is positive semidefinite, specifically if it can be written in a form $H = A^T A$.
+To show it lets consider the same product and we can see that squared norm of the resulting vector is always greater than zero.
+
+\[
+z^T H z = z^T A^T A z = (Az)^T (Az) = \norm{Az}^2 \ge 0
+\]
+
+So lets start from our initial equation for the loss function.
+
+\begin{align}
+J(\theta) = - \frac 1m \sum^m_{i=1} y^{(i)} log(h_{\theta}(x^{(i)})) + (1-y^{(i)})log(1-h_{\theta}(x^{(i)})) \\
+    \text{where}\ h_{\theta}(x) = g(\theta^Tx),\ \text{and}\ g(z) = \frac{1}{1 + e^{-z}}
+\end{align}
+
+Let's define two parts inside the sum and differentiate them separately
+\begin{align}
+y \cdot log (h_{\theta}(x)) \label{eq:1} \\
+(1 - y) \cdot log(1 - (h_{\theta}(x))) \label{eq:2}
+\end{align}
+
+Taking into account derivative of the logistic function and vector derivative of the dot product
+
+\begin{align}
+\frac {dlog(f(x))}{dx} &= \frac 1{f(x)} f'(x) \\
+ h_{\theta}'(x) &= g({\theta^T}x)(1 - g({\theta^T}x)) \\
+\frac{\partial\theta^Tx}{\partial\vec{\theta}} &= \vec{x}
+\end{align}
+
+Using those equations for derivative we can now simplify the first part of the gradient sum (1)
+
+\begin{align}
+\nabla_{\theta} y log (h_{\theta}(x)) &= \frac {\partial y log (h_{\theta}(x))}{\partial \vec \theta} \\
+&= y \cdot \frac{1}{h_{\theta}(x)} \cdot h_{\theta}'(x) \\
+&= y \cdot \frac{1}{g({\theta^T}x)} \cdot g({\theta^T}x)(1 - g({\theta^T}x)) \cdot \frac{\partial\theta^Tx}{\partial\vec{\theta}} \\
+&= y \cdot (1 - g({\theta^T}x)) \cdot \vec{x} 
+\end{align}
+
+Using similar technique we can simplify the second part of the gradient (1)
+
+\begin{align}
+\nabla_{\theta} (1 - y) log (1 - (h_{\theta}(x))) = (1 - y) \cdot \frac{1}{1 - h_{\theta}(x)} \cdot -h_{\theta}'(x) \\
+= (1 - y) \cdot \frac{1}{1 - g({\theta^T}x)} \cdot g({\theta^T}x)(1 - g({\theta^T}x)) \cdot -\frac{\partial\theta^Tx}{\partial\vec{\theta}} \\
+= (y - 1) \cdot  g({\theta^T}x)) \cdot \vec{x}
+\end{align}
+
+Summing the two resulting terms (\ref{eq:1}) and  (\ref{eq:2})  would provide us the expression under the sum
+
+\begin{align}
+(\ref{eq:1}) + (\ref{eq:2}) &= y \cdot (1 - g({\theta^T}x)) \cdot \vec{x}  + (y - 1) \cdot  g({\theta^T}x)) \cdot \vec{x} \\
+&= \vec{x}[y - \cancel{y \cdot g({\theta^T}x)} + \cancel{y \cdot g({\theta^T}x)} -  g({\theta^T}x)] \\
+&= \vec{x}[y -  g({\theta^T}x)]
+\end{align}
+
+So the final equation for the gradient would be
+
+\begin{align}
+\nabla_{\theta} J(\theta) = \frac1m \sum_{i=1}^m   \vec{x}^{(i)}[y^{(i)} -  g({\theta^T}x^{(i)})]
+\end{align}
+
+
+Now lets rewrite it in the vectorized form. Lets define the matrix of inputs X, where each i-th row represent a separate measurement in n-dimensional space.
+\[
+\underset{m \times n}{X} = 
+\left[
+  \begin{tabular}{c>{$}c<{$}c}
+    & \vdots & \\
+    --- & x^{(i)} & ---\\
+    & \vdots & \\
+  \end{tabular}
+\right]
+\]
+
+The first part of the gradient sum would be
+
+\[
+\sum_{i=1}^m   x^{(i)} y^{(i)} = 
+\underset{X^T}
+{\left[
+  \begin{array}{ccc}
+     & \vrule & \\
+    \ldots & x^{(i)} & \ldots \\
+     & \vrule & 
+  \end{array}
+\right]}
+\cdot
+\underset{\vec{y}}
+{\left[
+  \begin{array}{c}
+	y^{(1)} \\
+	\vdots\\
+	y^{(m)}
+  \end{array}
+\right]}
+= X^T \vec{y}
+\]
+
+Let's take a closer look at the second part
+
+\begin{align}
+\sum_{i=1}^m   x^{(i)}  g({\theta^T}x^{(i)}) &= 
+\left[
+  \begin{array}{ccc}
+     & \vrule & \\
+    \ldots & x^{(i)} & \ldots \\
+     & \vrule & 
+  \end{array}
+\right]
+\cdot
+\left[
+  \begin{array}{c}
+	g({\theta^T}x^{(1)}) \\
+	\vdots\\
+	g({\theta^T}x^{(m)})
+  \end{array}
+\right] \label{eq:3} \\
+ &= 
+\left[
+  \begin{array}{ccc}
+     & \vrule & \\
+    \ldots & x^{(i)} & \ldots \\
+     & \vrule & 
+  \end{array}
+\right]
+\cdot
+g\left(
+\left[
+  \begin{array}{c}
+	{\theta^T}x^{(1)} \\
+	\vdots\\
+	{\theta^T}x^{(m)}
+  \end{array}
+\right]
+\right) \label {eq:4}
+\end{align}
+
+The inner product vector in equation ({\ref{eq:4}}) could be rewriten as
+
+\[
+\left[
+  \begin{array}{c}
+	{\theta^T}x^{(1)} \\
+	\vdots\\
+	{\theta^T}x^{(m)}
+  \end{array}
+\right]
+=
+\left[
+  \begin{array}{c}
+	x^{(1)} \cdot {\vec{\theta}} \\
+	\vdots\\
+	x^{(m)} \cdot {\vec{\theta}} \\
+  \end{array}
+\right]
+= 
+\left[
+  \begin{tabular}{c>{$}c<{$}c}
+    & \vdots & \\
+    --- & x^{(i)} & ---\\
+    & \vdots & \\
+  \end{tabular}
+\right]
+\cdot
+\underset{\vec{\theta}}
+{\left[
+  \begin{array}{c}
+	\theta_0 \\
+	\vdots\\
+	\theta_n
+  \end{array}
+\right]}
+=X \theta
+\]
+
+So the second part equation \eqref{eq:4} could be rewriten as
+\[
+\sum_{i=1}^m   x^{(i)}  g({\theta^T}x^{(i)}) 
+= 
+X^Tg(X \theta)
+\]
+
+And the vectorized form of the gradient for loss function
+
+\begin{align}
+\nabla_{\theta} J(\theta) 
+\enskip &= \enskip 
+\frac1m \sum_{i=1}^m   \vec{x}^{(i)}[y^{(i)} -  g({\theta^T}x^{(i)})] 
+\enskip = \enskip
+\frac1m X^T[\vec{y} - g(X \vec \theta)]
+\end{align}
+
+When the gradient is in the vectorized form deriving the Hessian is much simpler. So by the definition of Hessian
+
+\[
+H = H^T = \frac{\partial^2J(\theta)}{\partial\theta\partial\theta^T}
+=\frac{\partial\nabla_{\theta}J(\theta)}{\partial\vec{\theta}}
+\]
+
+Using the vector-by-vector differentiating rules we can now simplify the equation
+
+\[
+\frac{\partial A\vec y}{\partial \vec x} = A \frac{\partial \vec y}{\partial \vec x} \qquad
+\frac{\partial g(\vec y)}{\partial \vec x} =  \frac{\partial g(\vec y)}{\partial \vec y}  \frac{\partial \vec y}{\partial \vec x}
+\]
+
+\begin{align}
+	H = \frac{\partial\nabla_{\theta}J(\theta)}{\partial\vec{\theta}}
+	&= \frac1m \enskip  \frac{\partial X^T g(X\theta)}{\partial\vec{\theta}} \\
+	&= \frac1m \enskip  X^T \enskip \frac{\partial  g(X\theta)}{\partial X \vec{\theta}} \enskip  \frac{\partial X\theta}{\partial \vec{\theta}} \\
+	& = \frac1m \enskip  X^T \enskip \frac{\partial  g(X\theta)}{\partial X \vec{\theta}} \enskip  X 
+\end{align}
+
+To calculate the inner term $\frac{\partial  g(X\theta)}{\partial X \vec{\theta}}$ we can use the extended definition of vector by vector differentiation
+ and taking into account that in our case function $g(\vec x) = [g(x_1), \enskip \dots \enskip , g(x_n)]$ is a simple function, hence $\frac{\partial g(x)_i}{\partial x_j} = 0$, for $i\not = j$
+
+\[
+\frac{\partial g(\vec x)}{\partial \vec x} = 
+\left[
+  \begin{array}{ccc}
+	\frac{\partial g(x)_1}{\partial x_1} & \ldots & \frac{\partial g(x)_1}{\partial x_n}\\
+	 & \ldots &  \\
+	\frac{\partial g(x)_n}{\partial x_1} & \ldots  & \frac{\partial g(x)_n}{\partial x_n}
+  \end{array}
+\right] =
+\left[
+  \begin{array}{ccc}
+	g'(x_1) &  & \text{\huge0} \\
+	 & \ddots &  \\
+	 \text{\huge0} &   & g'(x_n)
+  \end{array}
+\right] = D
+\]
+
+We are close to the end, consider matrix $D' = D/m$ and $\sqrt D' \cdot \sqrt D' = D'$, then we can rewrite Hessian, taking into account that diagonal matrices is always symmetrical
+
+\[
+H = \frac1m \enskip  X^T \enskip \frac{\partial  g(X\theta)}{\partial X \vec{\theta}} \enskip  X
+=  X^T D'  X
+= X^T \sqrt D' \cdot \sqrt D' X
+= (\sqrt D' X)^T \cdot \sqrt D' X
+= A^T A
+\]
+
+So the Hessian can be written as a product of $A^T A$ which means it is positive semi-definite. QED.
+
+\end{document}
+
