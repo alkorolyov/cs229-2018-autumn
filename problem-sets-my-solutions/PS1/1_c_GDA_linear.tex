@@ -38,7 +38,7 @@ Technically we need to derive the posterior distribution $p(y = 1 | x)$ and proo
 \]
 \bigbreak
 
-First, let's denote distributions in a simplified manner
+First, let's denote multidimensional Gaussian distributions in a simplified manner
 \[
 	p(x | y = 1 ) \ =  \ \frac1{c} \text{exp} \big[ f(x, \mu_1) \big] \qquad \text{where} \ f(x, \mu_1) = -\frac12 (x - \mu_1)^T \Sigma^{-1} (x - \mu_1)
 \]
@@ -57,7 +57,7 @@ p(y = 1| x) =
 \]
 \bigbreak
 
-So we would need to simplify $f(x, \mu_0) - f(x, \mu_1)$ part. First lets consider that covariance matrix $\Sigma$ and it's inverse $\Sigma^{-1}$ are symmetrical and lets open the brackets for the quadratic form and take a closer look at two inner terms
+So we would need to simplify $f(x, \mu_1) - f(x, \mu_0)$ part. First lets consider that covariance matrix $\Sigma$ and it's inverse $\Sigma^{-1}$ are symmetrical and lets open the brackets for the quadratic form and take a closer look at two inner terms
 
 \[
 (x - \mu)^T \Sigma^{-1} (x - \mu) = x^T \Sigma^{-1} x 
@@ -94,16 +94,16 @@ f(x, \mu_1) - f(x, \mu_0)
 
 $$
 = x^T \Sigma^{-1} (\mu_1 - \mu_0) -
-	 \frac 12 (\mu_1-\mu_0)^T \Sigma^{-1} (\mu_1 - \mu_0) =
+	 \frac 12 (\mu_1-\mu_0)^T \Sigma^{-1} (\mu_1 + \mu_0) =
 $$
 
 $$
 = x^T \Sigma^{-1} \Delta\mu -
-	\underbrace{\frac 12 \Delta\mu^T \Sigma^{-1} \Delta\mu}_\text{const}
+	\underbrace{\frac 12 \Delta\mu^T \Sigma^{-1} (\mu_1 + \mu_0)}_\text{const}
 , \quad \Delta\mu = \mu_1 - \mu_0
 $$
 
-And now we can derive the complete equation for posterior distribution $p(x|y=1)$
+And now we can derive the complete equation for posterior distribution $p(y=1|x)$
 
 \begin{align}
 p(y = 1| x) 
@@ -113,7 +113,7 @@ p(y = 1| x)
 		\Sigma^{-1} \Delta\mu
 	}_{\theta_1} - 
 	\underbrace{
-		\frac 12 \Delta\mu^T \Sigma^{-1} \Delta\mu
+		\frac 12 \Delta\mu^T \Sigma^{-1} (\mu_1 + \mu_0)
 		+ log(\frac{\phi}{1 - \phi}
 	}_{\theta_0}
 	) \Big) \Big]}
